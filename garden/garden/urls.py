@@ -20,5 +20,5 @@ app_name = 'garden'
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/login/', include('Login.urls')),
-    path('api/v1/cosmetics/', include('Cosmetics.urls'))
+    path('api/v1/cosmetics/', include('Cosmetics.urls')),
 ]

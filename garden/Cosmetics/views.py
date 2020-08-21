@@ -3,8 +3,6 @@ import time
 
 from garden import settings
 from django.http import JsonResponse
-
-
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
@@ -23,3 +21,8 @@ def imgUpload(request):
             'img_path': name
         }
         return JsonResponse(dict)
+
+@api_view(['GET'])
+def Cosmetics_Search(request, search):
+    print(search)
+    return Response(status=status.HTTP_200_OK)
