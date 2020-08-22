@@ -83,7 +83,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'garden',
         'USER': 'root',
-        'PASSWORD': "node14",
+        'PASSWORD': "root",
         'HOST': 'localhost',
         'PORT': '3306'
     }
