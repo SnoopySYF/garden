@@ -9,6 +9,7 @@ from rest_framework import status
 from garden_python.cosmetics import Cosmetics
 from garden_python.mysql import GMysql
 
+
 # Create your views here.
 def imgUpload(request):
     if( request.method == 'POST'):
@@ -32,11 +33,11 @@ def Cosmetics_Search(request, search):
 
 def test(request):
     print("test res")
-    Lipstick_color_D = Cosmetics().Lipstick_color_D()   #色号识别
-    Lipstick_color_recommend = Cosmetics().Lipstick_color_recommend()  #色号推荐
+    Lipstick_color_D = Cosmetics().Lipstick_color_D(file_path='D:/contest/ALBB/garden_code/garden/garden_python/image/5.jpg', suffix='jpg', isLocal=True)   #色号识别
+    Lipstick_color_recommend = Cosmetics().Lipstick_color_recommend(file_path='D:/contest/ALBB/garden_code/garden/garden_python/image/5.jpg', suffix='jpg', isLocal=True)  #色号推荐
     select_brands = GMysql().select_brands()  #查询所有的品牌名
-    select_series = GMysql().select_series()  #查询某个品牌名下的所有系列
-    select_lipsticks = GMysql().select_lipsticks() #查询某个品牌名下某个系列的所有色号
+    select_series = GMysql().select_series(b_id=1)  #查询某个品牌名下的所有系列
+    select_lipsticks = GMysql().select_lipsticks(s_id=1) #查询某个品牌名下某个系列的所有色号
     data = {
         'msg' : 'success',
         'data': {
