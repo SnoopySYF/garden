@@ -4,7 +4,7 @@ class GMysql:
     def __init__(self):
         self.host = "localhost"
         self.user = "root"
-        self.password = "root"
+        self.password = "node14"
         self.databases = "garden"
     
     def connection_garden(self):
