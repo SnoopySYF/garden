@@ -6,6 +6,7 @@ from django.http import JsonResponse
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
+
 # Create your views here.
 def imgUpload(request):
     if( request.method == 'POST'):
@@ -26,3 +27,7 @@ def imgUpload(request):
 def Cosmetics_Search(request, search):
     print(search)
     return Response(status=status.HTTP_200_OK)
+
+def test(request):
+    print("test res")
+    return JsonResponse({'status': 'OK'})
