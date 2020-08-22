@@ -9,6 +9,7 @@ from aliyunsdkimageseg.request.v20191230.ParseFaceRequest import ParseFaceReques
 from aliyunsdkimageseg.request.v20191230.SegmentCommodityRequest import SegmentCommodityRequest
 from aliyunsdkfacebody.request.v20191230.FaceMakeupRequest import FaceMakeupRequest
 from aliyunsdkfacebody.request.v20191230.DetectFaceRequest import DetectFaceRequest
+# from aliyunsdkviapiutils.request.v20200401.GetOssStsTokenRequest import FileUtils
 from viapi.fileutils import FileUtils
 
 import os
@@ -178,7 +179,7 @@ class Cosmetics:
         color, label = self.lip_color(img_make_up)
         return color, label
 
-if if __name__ == "__main__":
+if __name__ == "__main__":
     cosmetics = Cosmetics()
     color, label = cosmetics.Lipstick_color_D("./image/5.jpg", "jpg", True)
     print(color)
