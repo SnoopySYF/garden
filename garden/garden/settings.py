@@ -39,7 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'garden',
     'Login',
-    'Cosmetics'
+    'Cosmetics',
+    'corsheaders',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
