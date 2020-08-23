@@ -149,19 +149,22 @@ class Cosmetics:
     isLocal：图片是否在本地
     输出：
     颜色RGB码、标签
+    -1, -1: 照片不规范
     '''
     def Lipstick_color_D(self, file_path, suffix, isLocal):
         img = self.getImageUrl(file_path, suffix, isLocal)
         rs = self.DetecFace(img)
         if(0 == rs):
             color, label = self.Lipstick_color(img)
+            label = {"品牌":"1", "系列":"1"}
             return color, label
         elif(rs > 0):
             color, label = self.lip_color(img)
+            label = {"品牌":"1", "系列":"1"}
             return color, label
         else:
             print("error!")
-            return
+            return -1, -1
 
     '''
     口红色号推荐
@@ -183,6 +186,7 @@ class Cosmetics:
         elif(1 == rs):
             img_make_up = self.Face_makeup(img, ftype)
             color, label = self.lip_color(img_make_up)
+            label = {"品牌":"1", "系列":"1"}
             return color, label
         else:
             return -1, -1
