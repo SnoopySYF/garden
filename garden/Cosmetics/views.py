@@ -107,12 +107,12 @@ class Cosmetics:
     '''
     美妆
     '''
-    def Face_makeup(self, img):
+    def Face_makeup(self, img, ftype):
         request = FaceMakeupRequest()
         request.set_accept_format('json')
 
         request.set_MakeupType("whole")
-        request.set_ResourceType("2")
+        request.set_ResourceType(str(ftype))
         request.set_Strength("1")
         request.set_ImageURL(img)
 
@@ -169,14 +169,23 @@ class Cosmetics:
     file_path: 图片路径
     suffix：图片格式
     isLocal：图片是否在本地
+    ftype: 美妆类型 1（基础妆）、2（少女妆）、3（活力妆）、4（优雅妆）、5（魅惑妆）、6（梅子妆）
     输出：
+    0, 0  : 图片中没有人脸
+    -1,-1 : 图片中有多个人脸
     颜色RGB码、标签
     '''
-    def Lipstick_color_recommend(self, file_path, suffix, isLocal):
+    def Lipstick_color_recommend(self, file_path, suffix, isLocal, ftype):
         img = self.getImageUrl(file_path, suffix, isLocal)
-        img_make_up = self.Face_makeup(img)
-        color, label = self.lip_color(img_make_up)
-        return color, label
+        rs = self.DetecFace(img)
+        if(0 == rs):
+            return 0, 0
+        elif(1 == rs):
+            img_make_up = self.Face_makeup(img, ftype)
+            color, label = self.lip_color(img_make_up)
+            return color, label
+        else:
+            return -1, -1
 
 class GMysql:
 
@@ -247,7 +256,7 @@ def test(request):
     cos = Cosmetics()
     Gmysql = GMysql()
     color1, lable1 = cos.Lipstick_color_D(file_path='D:/contest/ALBB/garden_code/garden/garden_python/image/2.jpg', suffix='jpg', isLocal=True)   #色号识别
-    color2, lable2 = cos.Lipstick_color_recommend(file_path='D:/contest/ALBB/garden_code/garden/garden_python/image/2.jpg', suffix='jpg', isLocal=True)  #色号推荐
+    color2, lable2 = cos.Lipstick_color_recommend(file_path='D:/contest/ALBB/garden_code/garden/garden_python/image/2.jpg', suffix='jpg', isLocal=True, ftype=2)  #色号推荐
     select_brands = Gmysql.select_brands().data  #查询所有的品牌名
     select_series = Gmysql.select_series(b_id=1).data  #查询某个品牌名下的所有系列
     select_lipsticks = Gmysql.select_lipsticks(s_id=1).data #查询某个品牌名下某个系列的所有色号
