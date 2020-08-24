@@ -20,6 +20,9 @@ from rest_framework import status
 from Cosmetics.models import Brands
 from Cosmetics.models import Series
 from Cosmetics.models import Lipsticks
+from Cosmetics.models import User_Brands
+from Cosmetics.models import User_Series
+from Cosmetics.models import User_Lipsticks
 from Cosmetics.serializers import BrandsSerializer
 from Cosmetics.serializers import SeriesSerializer
 from Cosmetics.serializers import LipsticksSerializer
@@ -234,6 +237,47 @@ class GMysql:
         rs = LipsticksSerializer(results, many=True)
         return rs
 
+    """
+    查询所有的用户收藏品牌名
+    返回集合：
+    b_id: 品牌id
+    b_name: 品牌名
+    """
+    def select_user_brands(self):
+        results = User_Brands.objects.all()
+        rs = BrandsSerializer(results, many=True)
+        return rs
+
+    """
+    查询某个用户收藏品牌名下的所有系列
+    输入：
+    b_id: 品牌id
+    返回集合：
+    s_id: 系列id
+    s_name: 系列名
+    b_id: 品牌id
+    """
+    def select_user_series(self, b_id):
+        results = User_Series.objects.filter(brands = b_id)
+        rs = SeriesSerializer(results, many=True)
+        return rs
+
+    """
+    查询用户收藏某个品牌名下某个系列的所有色号
+    输入：
+    s_id: 系列id
+    返回集合：
+    l_id: 色号id
+    color: 色号RGB
+    id: 该色号id信息
+    l_name: 该色号名字
+    s_id: 系列id
+    """
+    def select_user_lipsticks(self, s_id):
+        results = User_Lipsticks.objects.filter(series = s_id)
+        rs = LipsticksSerializer(results, many=True)
+        return rs
+
 # Create your views here.
 def imgUpload(request):
     if( request.method == 'POST'):
@@ -264,6 +308,9 @@ def test(request):
     select_brands = Gmysql.select_brands().data  #查询所有的品牌名
     select_series = Gmysql.select_series(b_id=1).data  #查询某个品牌名下的所有系列
     select_lipsticks = Gmysql.select_lipsticks(s_id=1).data #查询某个品牌名下某个系列的所有色号
+    select_user_brands = Gmysql.select_user_brands().data  #查询所有的品牌名
+    select_user_series = Gmysql.select_user_series(b_id=1).data  #查询某个品牌名下的所有系列
+    select_user_lipsticks = Gmysql.select_user_lipsticks(s_id=1).data #查询某个品牌名下某个系列的所有色号
     data = {
         'msg' : 'success',
         'data': {
@@ -273,7 +320,10 @@ def test(request):
             'lable2': lable2,
             'select_brands': select_brands,
             'select_series': select_series,
-            'select_lipsticks': select_lipsticks
+            'select_lipsticks': select_lipsticks,
+            'select_user_brands': select_user_brands,
+            'select_user_series': select_user_series,
+            'select_user_lipsticks': select_user_lipsticks
         }
     }
     return JsonResponse(data)
