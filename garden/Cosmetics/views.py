@@ -1,5 +1,6 @@
 import os
 import time
+import math
 
 from aliyunsdkcore.client import AcsClient
 from aliyunsdkcore.acs_exception.exceptions import ClientException
@@ -27,12 +28,36 @@ from Cosmetics.serializers import BrandsSerializer
 from Cosmetics.serializers import SeriesSerializer
 from Cosmetics.serializers import LipsticksSerializer
 
+class Tool:
+    def Str2RGB(self, s):
+        R = int(s[0:2], 16)
+        G = int(s[2:4], 16)
+        B = int(s[4:6], 16)
+        return R, G, B
+
+    def Chromatic(self, R1, G1, B1, R2, G2, B2):
+        r_mean = (R1 + R2)/2
+        R = R1 - R2
+        G = G1 - G2
+        B = B1 - B2
+        return math.sqrt((2+r_mean)/256*(R**2) + 4*(G**2) + (2+(255-r_mean)/256)*(B**2))
+    
+    def Select_gamut(self, s):
+        results = Series.objects.filter(color_gamut = s)
+        rs = SeriesSerializer(results, many=True)
+        return rs
+
+    def Get_similiar_color(self, color):
+        colors = self.Select_gamut(color[0])
+        
+
 class Cosmetics:
     
     def __init__(self):
         self.akkey = "LTAI4GBvsVgxXcFe2fa2cDho"
         self.assec = "b9yxczP7OPLfi7G2KDjkqKvYSsfNxN"
         self.client = AcsClient(self.akkey, self.assec, 'cn-shanghai')
+        self.tool = Tool()
     
     '''
     将图片转化为网址链接

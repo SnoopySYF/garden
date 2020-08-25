@@ -20,6 +20,7 @@ class Lipsticks(models.Model):
     color = models.CharField(max_length=45,blank=False)
     id = models.CharField(max_length=45,blank=False)
     name = models.CharField(max_length=45,blank=False)
+    color_gamut = models.CharField(max_length=4, blank=False)    #color的第一个字符，例如3AB1FA 则存储为3
     series = models.ForeignKey('Series', on_delete=models.CASCADE)
     @property
     def series_info(self):
