@@ -43,12 +43,29 @@ class Tool:
         return math.sqrt((2+r_mean)/256*(R**2) + 4*(G**2) + (2+(255-r_mean)/256)*(B**2))
     
     def Select_gamut(self, s):
-        results = Series.objects.filter(color_gamut = s)
-        rs = SeriesSerializer(results, many=True)
+        results = Lipsticks.objects.filter(color_gamut = s)
+        rs = LipsticksSerializer(results, many=True)
         return rs
 
     def Get_similiar_color(self, color):
-        colors = self.Select_gamut(color[0])
+        colors_rs = self.Select_gamut(color[0]).data
+        R, G, B = self.Str2RGB(color)
+        colors = [c for c in colors_rs]
+        if(len(colors) == 0):
+            return -1
+        si_c = colors[0]['color']
+        si_id = 0
+        R1, G1, B1 = self.Str2RGB(si_c)
+        min_c = self.Chromatic(R, G, B, R1, G1, B1)
+        for i in range(1, len(colors)):
+            c = colors[i]['color']
+            R1, B1, G1 = self.Str2RGB(c)
+            m_c = self.Chromatic(R, G, B, R1, G1, B1)
+            if(m_c < min_c):
+                si_c = c
+                min_c = m_c
+                si_id = i
+        return colors[si_id]
         
 
 class Cosmetics:
@@ -178,17 +195,24 @@ class Cosmetics:
     输出：
     颜色RGB码、标签
     -1, -1: 照片不规范
+    -2,-2 : 没有识别到该色号
     '''
     def Lipstick_color_D(self, file_path, suffix, isLocal):
         img = self.getImageUrl(file_path, suffix, isLocal)
         rs = self.DetecFace(img)
         if(0 == rs):
-            color, label = self.Lipstick_color(img)
-            label = {"品牌":"1", "系列":"1"}
+            color, la = self.Lipstick_color(img)
+            si_color = self.tool.Get_similiar_color(color)
+            if(si_color == -1):
+                return -2, -2
+            label = {'品牌' : si_color['series_info']['brands']['name'], '系列': si_color['series_info']['name']}
             return color, label
         elif(rs > 0):
-            color, label = self.lip_color(img)
-            label = {"品牌":"1", "系列":"1"}
+            color, la = self.lip_color(img)
+            si_color = self.tool.Get_similiar_color(color)
+            if(si_color == -1):
+                return -2, -2
+            label = {'品牌' : si_color['series_info']['brands']['name'], '系列': si_color['series_info']['name']}
             return color, label
         else:
             print("error!")
@@ -204,6 +228,7 @@ class Cosmetics:
     输出：
     0, 0  : 图片中没有人脸
     -1,-1 : 图片中有多个人脸
+    -2,-2 : 没有识别到该色号
     颜色RGB码、标签
     '''
     def Lipstick_color_recommend(self, file_path, suffix, isLocal, ftype):
@@ -213,8 +238,11 @@ class Cosmetics:
             return 0, 0
         elif(1 == rs):
             img_make_up = self.Face_makeup(img, ftype)
-            color, label = self.lip_color(img_make_up)
-            label = {"品牌":"1", "系列":"1"}
+            color, la = self.lip_color(img_make_up)
+            si_color = self.tool.Get_similiar_color(color)
+            if(si_color == -1):
+                return -2, -2
+            label = {'品牌' : si_color['series_info']['brands']['name'], '系列': si_color['series_info']['name']}
             return color, label
         else:
             return -1, -1
@@ -328,6 +356,7 @@ def test(request):
     print("test res")
     cos = Cosmetics()
     Gmysql = GMysql()
+    tool = Tool()
     color1, lable1 = cos.Lipstick_color_D(file_path='D:/contest/ALBB/garden_code/garden/garden_python/image/2.jpg', suffix='jpg', isLocal=True)   #色号识别
     color2, lable2 = cos.Lipstick_color_recommend(file_path='D:/contest/ALBB/garden_code/garden/garden_python/image/2.jpg', suffix='jpg', isLocal=True, ftype=2)  #色号推荐
     select_brands = Gmysql.select_brands().data  #查询所有的品牌名
@@ -336,6 +365,8 @@ def test(request):
     select_user_brands = Gmysql.select_user_brands().data  #查询所有的品牌名
     select_user_series = Gmysql.select_user_series(b_id=1).data  #查询某个品牌名下的所有系列
     select_user_lipsticks = Gmysql.select_user_lipsticks(s_id=1).data #查询某个品牌名下某个系列的所有色号
+    color = tool.Get_similiar_color("A132E1")
+    # color = tool.Select_gamut("A").data
     data = {
         'msg' : 'success',
         'data': {
@@ -348,7 +379,8 @@ def test(request):
             'select_lipsticks': select_lipsticks,
             'select_user_brands': select_user_brands,
             'select_user_series': select_user_series,
-            'select_user_lipsticks': select_user_lipsticks
+            'select_user_lipsticks': select_user_lipsticks,
+            'color': color
         }
     }
     return JsonResponse(data)
