@@ -27,6 +27,7 @@ from Cosmetics.models import User_Lipsticks
 from Cosmetics.serializers import BrandsSerializer
 from Cosmetics.serializers import SeriesSerializer
 from Cosmetics.serializers import LipsticksSerializer
+from Cosmetics.serializers import UserLipsticksSerializer
 
 class Tool:
     def Str2RGB(self, s):
@@ -328,8 +329,43 @@ class GMysql:
     """
     def select_user_lipsticks(self, s_id):
         results = User_Lipsticks.objects.filter(series = s_id)
-        rs = LipsticksSerializer(results, many=True)
+        rs = UserLipsticksSerializer(results, many=True)
         return rs
+
+    """
+    向用户收藏中添加数据
+    输入：lid ：色号id
+    """
+    def Insert_user_lipsticks(self, lid):
+        lips = Lipsticks.objects.filter(l_id = lid)
+        lip = LipsticksSerializer(lips, many=True).data
+        b_id, b_name, s_id, s_name = lip[0]['series_info']['brands']['b_id'], lip[0]['series_info']['brands']['name'], lip[0]['series_info']['s_id'], lip[0]['series_info']['name']
+        ser = Series.objects.filter(s_id = s_id)
+        bra = Brands.objects.filter(b_id = b_id)
+        b = User_Brands.objects.create(b_id = b_id, name = b_name)
+        s = User_Series.objects.create(s_id = s_id, name = s_name, brands = b)
+        User_Lipsticks.objects.create(l_id = lip[0]['l_id'], color = lip[0]['color'], id = lip[0]['id'], name = lip[0]['name'], series = s)
+
+    """
+    删除用户收藏的某个数据
+    """
+    def Delete_user_lipsticks(self, bid, sid, lid):
+        User_Lipsticks.objects.filter(l_id = lid).delete()
+        User_Series.objects.filter(s_id = sid).delete()
+        User_Brands.objects.filter(b_id = bid).delete()
+
+    """
+    查询用户收藏中是否有该色号
+    输入：lid
+    返回：
+    1 存在
+    0 不存在
+    """
+    def Query_user_lipsticks(self, lid):
+        if(User_Lipsticks.objects.filter(l_id = lid)):
+            return 1
+        return 0
+        
 
 # Create your views here.
 def imgUpload(request):
@@ -366,6 +402,9 @@ def test(request):
     select_user_series = Gmysql.select_user_series(b_id=1).data  #查询某个品牌名下的所有系列
     select_user_lipsticks = Gmysql.select_user_lipsticks(s_id=1).data #查询某个品牌名下某个系列的所有色号
     color = tool.Get_similiar_color("A132E1")
+    # Gmysql.Insert_user_lipsticks(1)
+    # Gmysql.Delete_user_lipsticks(1, 1, 1)
+    rs = Gmysql.Query_user_lipsticks(2)
     data = {
         'msg' : 'success',
         'data': {
@@ -379,7 +418,8 @@ def test(request):
             'select_user_brands': select_user_brands,
             'select_user_series': select_user_series,
             'select_user_lipsticks': select_user_lipsticks,
-            'color': color
+            'color': color,
+            'rs': rs
         }
     }
     return JsonResponse(data)
