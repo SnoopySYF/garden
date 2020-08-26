@@ -205,14 +205,14 @@ class Cosmetics:
             si_color = self.tool.Get_similiar_color(color)
             if(si_color == -1):
                 return -2, -2
-            label = {'品牌' : si_color['series_info']['brands']['name'], '系列': si_color['series_info']['name']}
+            label = {'品牌' : si_color['series_info']['brands']['name'], '系列': si_color['series_info']['name'], '色号名':si_color['name']}
             return color, label
         elif(rs > 0):
             color, la = self.lip_color(img)
             si_color = self.tool.Get_similiar_color(color)
             if(si_color == -1):
                 return -2, -2
-            label = {'品牌' : si_color['series_info']['brands']['name'], '系列': si_color['series_info']['name']}
+            label = {'品牌' : si_color['series_info']['brands']['name'], '系列': si_color['series_info']['name'], '色号名':si_color['name']}
             return color, label
         else:
             print("error!")
@@ -242,7 +242,7 @@ class Cosmetics:
             si_color = self.tool.Get_similiar_color(color)
             if(si_color == -1):
                 return -2, -2
-            label = {'品牌' : si_color['series_info']['brands']['name'], '系列': si_color['series_info']['name']}
+            label = {'品牌' : si_color['series_info']['brands']['name'], '系列': si_color['series_info']['name'], '色号名':si_color['name']}
             return color, label
         else:
             return -1, -1
@@ -366,7 +366,6 @@ def test(request):
     select_user_series = Gmysql.select_user_series(b_id=1).data  #查询某个品牌名下的所有系列
     select_user_lipsticks = Gmysql.select_user_lipsticks(s_id=1).data #查询某个品牌名下某个系列的所有色号
     color = tool.Get_similiar_color("A132E1")
-    # color = tool.Select_gamut("A").data
     data = {
         'msg' : 'success',
         'data': {
