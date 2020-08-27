@@ -181,7 +181,7 @@ class Cosmetics:
 
 if __name__ == "__main__":
     cosmetics = Cosmetics()
-    color, label = cosmetics.Lipstick_color_D(file_path='D:/contest/ALBB/garden_code/garden/garden_python/image/5.jpg', suffix='jpg', isLocal=True)
+    color, label = cosmetics.Lipstick_color_recommend("./image/2.jpg", "jpg", True)
     print(color)
     print(label)
 

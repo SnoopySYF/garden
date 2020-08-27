@@ -198,26 +198,26 @@ class Cosmetics:
     -1, -1: 照片不规范
     -2,-2 : 没有识别到该色号
     '''
-    def Lipstick_color_D(self, file_path, suffix, isLocal):
+    def Lipstick_color_recognize(self, file_path, suffix, isLocal):
         img = self.getImageUrl(file_path, suffix, isLocal)
         rs = self.DetecFace(img)
         if(0 == rs):
             color, la = self.Lipstick_color(img)
             si_color = self.tool.Get_similiar_color(color)
             if(si_color == -1):
-                return -2, -2
-            label = {'品牌' : si_color['series_info']['brands']['name'], '系列': si_color['series_info']['name'], '色号名':si_color['name']}
-            return color, label
+                return -2
+            rs = {'color':color, 'brands' : si_color['series_info']['brands']['name'], 'series': si_color['series_info']['name'], 'lipsticks':si_color['name']}
+            return rs
         elif(rs > 0):
             color, la = self.lip_color(img)
             si_color = self.tool.Get_similiar_color(color)
             if(si_color == -1):
-                return -2, -2
-            label = {'品牌' : si_color['series_info']['brands']['name'], '系列': si_color['series_info']['name'], '色号名':si_color['name']}
-            return color, label
+                return -2
+            rs = {'color':color, 'brands' : si_color['series_info']['brands']['name'], 'series': si_color['series_info']['name'], 'lipsticks':si_color['name']}
+            return rs
         else:
             print("error!")
-            return -1, -1
+            return -1
 
     '''
     口红色号推荐
@@ -236,17 +236,17 @@ class Cosmetics:
         img = self.getImageUrl(file_path, suffix, isLocal)
         rs = self.DetecFace(img)
         if(0 == rs):
-            return 0, 0
+            return 0
         elif(1 == rs):
             img_make_up = self.Face_makeup(img, ftype)
             color, la = self.lip_color(img_make_up)
             si_color = self.tool.Get_similiar_color(color)
             if(si_color == -1):
-                return -2, -2
-            label = {'品牌' : si_color['series_info']['brands']['name'], '系列': si_color['series_info']['name'], '色号名':si_color['name']}
-            return color, label
+                return -2
+            rs = {'color':color, 'brands' : si_color['series_info']['brands']['name'], 'series': si_color['series_info']['name'], 'lipsticks':si_color['name']}
+            return rs
         else:
-            return -1, -1
+            return -1
 
 class GMysql:
 
@@ -368,6 +368,7 @@ class GMysql:
         
 
 # Create your views here.
+@api_view(['POST'])
 def imgUpload(request):
     if( request.method == 'POST'):
         file_obj = request.FILES.get('img', None)
@@ -382,19 +383,136 @@ def imgUpload(request):
             'img_path': name
         }
         return JsonResponse(dict)
+    return Response(status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
-def Cosmetics_Search(request, search):
-    print(search)
-    return Response(status=status.HTTP_200_OK)
+def Recognize(request, filePath):
+    cos = Cosmetics()
+    if(request.method == 'GET'):
+        fp = "upload/" + filePath + ".jpg"
+        res = cos.Lipstick_color_recognize(file_path=fp, suffix='jpg', isLocal=True)
+        if(isinstance(res, int)):
+            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response(res)
+    return Response(status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def Recommend(request, filePath, ftype):
+    cos = Cosmetics()
+    if(request.method == 'GET'):
+        fp = "upload/" + filePath + ".jpg"
+        res = cos.Lipstick_color_recommend(file_path=fp, suffix='jpg', isLocal=True, ftype=ftype)
+        if(isinstance(res, int)):
+            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response(res)
+    return Response(status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def Brands_operation(request):
+    Gmysql = GMysql()
+    if(request.method == 'GET'):
+        try:
+            select_brands = Gmysql.select_brands().data
+        except BaseException:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(select_brands)
+    return Response(status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def Series_operation(request, b_id):
+    Gmysql = GMysql()
+    if(request.method == 'GET'):
+        try:
+            select_series = Gmysql.select_series(b_id=b_id).data
+        except BaseException:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(select_series)
+    return Response(status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def Lipsticks_operation(request, s_id):
+    Gmysql = GMysql()
+    if(request.method == 'GET'):
+        try:
+            select_lipsticks = Gmysql.select_lipsticks(s_id=s_id).data
+        except BaseException:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(select_lipsticks)
+    return Response(status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def User_brands_operation(request):
+    Gmysql = GMysql()
+    if(request.method == 'GET'):
+        try:
+            select_user_brands = Gmysql.select_user_brands().data
+        except BaseException:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(select_user_brands)
+    return Response(status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def User_series_operation(request, b_id):
+    Gmysql = GMysql()
+    if(request.method == 'GET'):
+        try:
+            select_user_series = Gmysql.select_user_series(b_id=b_id).data
+        except BaseException:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(select_user_series)
+    return Response(status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def User_lipsticks_operation(request, s_id):
+    Gmysql = GMysql()
+    if(request.method == 'GET'):
+        try:
+            select_user_lipsticks = Gmysql.select_user_lipsticks(s_id=s_id).data
+        except BaseException:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(select_user_lipsticks)
+    return Response(status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def User_insert(request, lid):
+    Gmysql = GMysql()
+    if(request.method == 'POST'):
+        try:
+            Gmysql.Insert_user_lipsticks(lid=lid)
+        except BaseException:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(status=status.HTTP_200_OK)
+    return Response(status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['DELETE'])
+def User_delete(request, bid, sid, lid):
+    Gmysql = GMysql()
+    if(request.method == 'DELETE'):
+        try:
+            Gmysql.Delete_user_lipsticks(bid=bid, sid=sid, lid=lid)
+        except BaseException:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(status=status.HTTP_200_OK)
+    return Response(status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def User_comfirm(request, lid):
+    Gmysql = GMysql()
+    if(request.method == 'GET'):
+        try:
+            res = Gmysql.Query_user_lipsticks(lid=lid)
+        except BaseException:
+            return Response({'res':res}) 
+        return Response(status=status.HTTP_200_OK)
+    return Response(status=status.HTTP_400_BAD_REQUEST)
 
 def test(request):
     print("test res")
     cos = Cosmetics()
     Gmysql = GMysql()
     tool = Tool()
-    color1, lable1 = cos.Lipstick_color_D(file_path='D:/contest/ALBB/garden_code/garden/garden_python/image/2.jpg', suffix='jpg', isLocal=True)   #色号识别
-    color2, lable2 = cos.Lipstick_color_recommend(file_path='D:/contest/ALBB/garden_code/garden/garden_python/image/2.jpg', suffix='jpg', isLocal=True, ftype=2)  #色号推荐
+    color1 = cos.Lipstick_color_recognize(file_path='D:/contest/ALBB/garden_code/garden/garden_python/image/2.jpg', suffix='jpg', isLocal=True)   #色号识别
+    color2 = cos.Lipstick_color_recommend(file_path='D:/contest/ALBB/garden_code/garden/garden_python/image/2.jpg', suffix='jpg', isLocal=True, ftype=2)  #色号推荐
     select_brands = Gmysql.select_brands().data  #查询所有的品牌名
     select_series = Gmysql.select_series(b_id=1).data  #查询某个品牌名下的所有系列
     select_lipsticks = Gmysql.select_lipsticks(s_id=1).data #查询某个品牌名下某个系列的所有色号
@@ -403,15 +521,13 @@ def test(request):
     select_user_lipsticks = Gmysql.select_user_lipsticks(s_id=1).data #查询某个品牌名下某个系列的所有色号
     color = tool.Get_similiar_color("A132E1")
     # Gmysql.Insert_user_lipsticks(1)
-    # Gmysql.Delete_user_lipsticks(1, 1, 1)
+    Gmysql.Delete_user_lipsticks(1, 1, 1)
     rs = Gmysql.Query_user_lipsticks(2)
     data = {
         'msg' : 'success',
         'data': {
             'color1': color1,
-            'lable1': lable1,
             'color2': color2,
-            'lable2': lable2,
             'select_brands': select_brands,
             'select_series': select_series,
             'select_lipsticks': select_lipsticks,
