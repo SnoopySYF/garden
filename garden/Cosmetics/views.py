@@ -281,8 +281,8 @@ class GMysql:
 # Create your views here.
 def imgUpload(request):
     if( request.method == 'POST'):
-        file_obj = request.FILES.get('img', None)
-        name = time.strftime("%Y%m%d%H%M%S", time.localtime()) + file_obj.name
+        file_obj = request.FILES.get('image', None)
+        name = time.strftime("%Y%m%d%H%M%S", time.localtime()) + ".jpg"
         file_path = os.path.join(settings.UPLOAD_FILE, name)
         f = open(file_path, 'wb')
         for i in file_obj.chunks():

@@ -128,4 +128,4 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
-UPLOAD_FILE = os.path.join(BASE_DIR,'/CoVo/frontend/public/img/walfare/')
+UPLOAD_FILE = os.path.join(BASE_DIR,'/garden/upload/')
