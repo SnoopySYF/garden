@@ -12,6 +12,12 @@ class LipsticksSerializer(serializers.ModelSerializer):
     series_info = serializers.ReadOnlyField();
     class Meta:
         model = Lipsticks
+        fields = ('l_id', 'color', 'id', 'name', 'color_gamut', 'series_info')
+
+class UserLipsticksSerializer(serializers.ModelSerializer):
+    series_info = serializers.ReadOnlyField();
+    class Meta:
+        model = Lipsticks
         fields = ('l_id', 'color', 'id', 'name', 'series_info')
 
 class SeriesSerializer(serializers.ModelSerializer):
