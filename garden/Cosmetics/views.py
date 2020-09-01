@@ -502,8 +502,8 @@ def User_comfirm(request, lid):
         try:
             res = Gmysql.Query_user_lipsticks(lid=lid)
         except BaseException:
-            return Response({'res':res}) 
-        return Response(status=status.HTTP_200_OK)
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response({'res':res}) 
     return Response(status=status.HTTP_400_BAD_REQUEST)
 
 def test(request):
