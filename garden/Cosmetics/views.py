@@ -1,6 +1,7 @@
 import os
 import time
 import math
+from PIL import Image
 
 from aliyunsdkcore.client import AcsClient
 from aliyunsdkcore.acs_exception.exceptions import ClientException
@@ -67,6 +68,12 @@ class Tool:
                 min_c = m_c
                 si_id = i
         return colors[si_id]
+
+    def produceImage(file_Path, width, height, file_out):
+        file_in = fp = "upload/" + file_Path + ".jpg"
+        image = Image.open(file_in)
+        resized_image = image.resize((width, height), Image.ANTIALIAS)
+        resized_image.save(file_out)
         
 
 class Cosmetics:
@@ -388,8 +395,10 @@ def imgUpload(request):
 @api_view(['GET'])
 def Recognize(request, filePath):
     cos = Cosmetics()
+    tl = Tool()
     if(request.method == 'GET'):
-        fp = "upload/" + filePath + ".jpg"
+        fp = "upload/" + filePath + "_1.jpg"
+        tl.produceImage(filePath, 2000, 2000, fp)
         res = cos.Lipstick_color_recognize(file_path=fp, suffix='jpg', isLocal=True)
         if(isinstance(res, int)):
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -399,8 +408,10 @@ def Recognize(request, filePath):
 @api_view(['GET'])
 def Recommend(request, filePath, ftype):
     cos = Cosmetics()
+    tl = Tool()
     if(request.method == 'GET'):
-        fp = "upload/" + filePath + ".jpg"
+        fp = "upload/" + filePath + "_1.jpg"
+        tl.produceImage(filePath, 2000, 2000, fp)
         res = cos.Lipstick_color_recommend(file_path=fp, suffix='jpg', isLocal=True, ftype=ftype)
         if(isinstance(res, int)):
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
